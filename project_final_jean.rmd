@@ -1,0 +1,233 @@
+The Wine Geek Analysis 
+========================================================
+##### by Jean Phelippe Ramos de Oliveira (jean.phelippe92@gmail.com)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using in your analysis in this code
+# chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk. This
+# prevents the code from displaying in the knitted HTML output. You should set
+# echo=FALSE for all code chunks in your file, unless it makes sense for your
+# report to show the code that generated a particular plot.
+
+# The other parameters for "message" and "warning" should also be set to FALSE
+# for other code chunks once you have verified that each plot comes out as you
+# want it to. This will clean up the flow of your report.
+
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r echo=FALSE, Load_the_Data}
+# Load the Data
+data <- read.csv('wineQualityReds.csv', sep=',')
+```
+
+
+# Abstract
+>  We know that taste is very difficult to map and understand as different people have different preferences. However, at the same time, it's well known that wines can have different levels of quality that yield a whole span of different prices. The goal of this document is to present a technical analysis over physical and chemical variables from Portuguese wines and try to shed some light on the relationships between physicochemical properties of wine and the rates given to the wines by wine experts. 
+
+*We have deleted the variable listing the IDs.*
+
+```{r echo=FALSE}
+data <- subset(data, select = -c(X))
+```
+
+
+# Univariate Plots Section
+
+Below we can find a summary statistics of all variables:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(data)
+```
+
+ In our case, there is only one categorical variable which is quality (integers between 0 and 10).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(x = quality, data = data)
+```
+
+Let's start by analyzing the quality:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots2}
+summary(data$quality)
+```
+
+As we can see, the median is around the rating 6.0 with the best wine rated at 8.0. Which means that's very difficult to find good wines (>7) in this dataset as per statistical analysis. The plot shows that majority of wines are rates between 5 or 6. This also means that our analysis may be biased towards lower quality wines.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(x = alcohol, data = data)
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(data$alcohol)
+```
+
+
+The minimum alcohol percentage by volume is 8.4 and it ranges up to 14.90. The dataset is skewed towards the range of 10%, which is reasonable for most wines I know. I wonder if alcohol levels are actually relevant for a good rating as stronger wines may be more difficult to appreciate. Also it is a substance that evaporates easily and can affect smell.
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(x = free.sulfur.dioxide, data = data)
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(data$free.sulfur.dioxide)
+```
+
+
+Free SO2 is also spread across a wide range. The minimum is 1 and maxiumum goes to 72 mg/dm^3. There is a higher concentration in the range of 7-20 mg/dm^3. This substance is related to oxidation of the wine and it's well known that the oxidation affects the wine taste.
+
+
+# Univariate Analysis
+
+> **Tip**: Now that you've completed your univariate explorations, it's time to
+reflect on and summarize what you've found. Use the questions below to help you
+gather your observations and add your own if you have other thoughts!
+
+### What is the structure of your dataset?
+
+```{r echo=FALSE, Univariate_Plots}
+names(data)
+```
+**Variables**:
+
+1. fixed acidity (tartaric acid - g / dm^3)
+2. volatile acidity (acetic acid - g / dm^3)
+3. citric acid (g / dm^3)
+4. residual sugar (g / dm^3)
+5. chlorides (sodium chloride - g / dm^3
+6. free sulfur dioxide (mg / dm^3)
+7. total sulfur dioxide (mg / dm^3)
+8. density (g / cm^3)
+9. pH
+10. sulphates (potassium sulphate - g / dm3)
+11. alcohol (% by volume)
+12. quality (score between 0 and 10)
+   
+
+According to the list above, we have 12 variables in which the first 11 are physicochemical properties that were measured and a final variable called quality that was a rate from 0 (very bad) to 10 (excellent) given by at least 3 wine experts. There are 1599 observations in this dataset.
+
+
+
+### What is/are the main feature(s) of interest in your dataset?
+
+### What other features in the dataset do you think will help support your \
+investigation into your feature(s) of interest?
+
+### Did you create any new variables from existing variables in the dataset?
+
+### Of the features you investigated, were there any unusual distributions? \
+Did you perform any operations on the data to tidy, adjust, or change the form \
+of the data? If so, why did you do this?
+
+
+# Bivariate Plots Section
+
+> **Tip**: Based on what you saw in the univariate plots, what relationships
+between variables might be interesting to look at in this section? Don't limit
+yourself to relationships between a main output feature and one of the
+supporting variables. Try to look at relationships between supporting variables
+as well.
+
+We can plot a few of the variables above in order to look for outliers. Variables such as `total.sulfur.dioxide` and `residual.sugar` presents a Maximum value that is way higher than their 3rd Quartile, which suggests some outliers.
+
+```{r echo=FALSE, Bivariate_Plots}
+
+```
+
+# Bivariate Analysis
+
+> **Tip**: As before, summarize what you found in your bivariate explorations
+here. Use the questions below to guide your discussion.
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. How did the feature(s) of interest vary with other features in \
+the dataset?
+
+### Did you observe any interesting relationships between the other features \
+(not the main feature(s) of interest)?
+
+### What was the strongest relationship you found?
+
+
+# Multivariate Plots Section
+
+> **Tip**: Now it's time to put everything together. Based on what you found in
+the bivariate plots section, create a few multivariate plots to investigate
+more complex interactions between variables. Make sure that the plots that you
+create here are justified by the plots you explored in the previous section. If
+you plan on creating any mathematical models, this is the section where you
+will do that.
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. Were there features that strengthened each other in terms of \
+looking at your feature(s) of interest?
+
+### Were there any interesting or surprising interactions between features?
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the \
+strengths and limitations of your model.
+
+------
+
+# Final Plots and Summary
+
+> **Tip**: You've done a lot of exploration and have built up an understanding
+of the structure of and relationships between the variables in your dataset.
+Here, you will select three plots from all of your previous exploration to
+present here as a summary of some of your most interesting findings. Make sure
+that you have refined your selected plots for good titling, axis labels (with
+units), and good aesthetic choices (e.g. color, transparency). After each plot,
+make sure you justify why you chose each plot by describing what it shows.
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+
+```
+
+### Description One
+
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+
+```
+
+### Description Two
+
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+
+```
+
+### Description Three
+
+------
+
+# Reflection
+
+> **Tip**: Here's the final step! Reflect on the exploration you performed and
+the insights you found. What were some of the struggles that you went through?
+What went well? What was surprising? Make sure you include an insight into
+future work that could be done with the dataset.
+
+> Citation: P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. 
+  Modeling wine preferences by data mining from physicochemical properties.
+  In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
+
