@@ -86,16 +86,71 @@ summary(data$free.sulfur.dioxide)
 
 Free SO2 is also spread across a wide range. The minimum is 1 and maxiumum goes to 72 mg/dm^3. There is a higher concentration in the range of 7-20 mg/dm^3. This substance is related to oxidation of the wine and it's well known that the oxidation affects the wine taste.
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(x = total.sulfur.dioxide, data = data)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(data$total.sulfur.dioxide)
+```
+
+Total SO2 has a wide range of values with the Maximum at 289mg/dm³. Minimum at 6mg/dm³ and mean around 46mg/dm³ (highr than free SO2 as expected once free SO2 should be a part of the total)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(x = total.sulfur.dioxide, data = data)+
+  scale_x_log10()
+```
+
+After applying a log10 transformation to the plot we can now reduce the effect of the long tail and clearly see a more normal distribution around the value of 30g/dm³
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(x = fixed.acidity, data = data)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(x = volatile.acidity, data = data)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(x = citric.acid, data = data)
+```
+
+Fixed and Volatile acidity show up with two peaks around 7-8g/dm³ for fixed and 0.4-0.6g/dm³. Fixed acidity ranges from 4.6 up to almost 16g/dm³ but the mean is around 8g/dm³. The Volatile acidity ranges from 0.12-1.58g/dm³ with Mean around 0.52g/dm³. Higher levels of volatile acidity (usually linked with acetic acid) can yield a bad taste (vinegar-like taste). The amount of non-volatile acid is way higher, because they compose the bulk of acidity on a wine.
+
+Citric acid levels can be found at higher range than acetic acid, but they are still small compared to non-volatile. It ranges from 0-1g/dm³. 
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(x = pH, data = data)
+```
+
+pH levels range from 2.74 to 4.01 which are within the acid range exactly as we expect from wines.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(x = chlorides, data = data)
+```
+
+Chlorides usually are liked to the salty taste and should be found on small quantities. They range from 0.012 up to 0.611 with median around 0.08g/dm³. It can vary up to 50 time from the minimum up to maximum values on this dataset.
+
+```{r echo=FALSE,message=FALSE, warning=FALSE}
+qplot(x = chlorides, data = data) +
+  scale_x_continuous(limits = c(0.01,0.4)) +
+  facet_wrap(~quality, ncol = 3)
+```
+
+Higher quality wines seem to have a more concentrated range of chlorides <0.1 but we still need to dive deeper into the data to check if there's any relationship between variables.
+
+
+
+
 
 # Univariate Analysis
 
-> **Tip**: Now that you've completed your univariate explorations, it's time to
-reflect on and summarize what you've found. Use the questions below to help you
-gather your observations and add your own if you have other thoughts!
-
 ### What is the structure of your dataset?
 
-```{r echo=FALSE, Univariate_Plots}
+```{r echo=FALSE}
 names(data)
 ```
 **Variables**:
@@ -114,21 +169,30 @@ names(data)
 12. quality (score between 0 and 10)
    
 
-According to the list above, we have 12 variables in which the first 11 are physicochemical properties that were measured and a final variable called quality that was a rate from 0 (very bad) to 10 (excellent) given by at least 3 wine experts. There are 1599 observations in this dataset.
-
-
+According to the list above, we have 12 variables in which the first 11 are physicochemical properties that were measured and a final variable called quality that was a rate from 0 (very bad) to 10 (excellent) given by at least 3 wine experts. There are 1599 observations in this dataset. Most of the wines are in average quality (5-6 quality rates). 
 
 ### What is/are the main feature(s) of interest in your dataset?
+
+The main feature that is common to our knowldege and of many people that appreciate drinks is the `alcohol level`. We'd like to evaluate the correlation between alcohol levels and quality and use other variable to understand the dynamic of the quality as we believe that there's a limit in which the alcohol level can affect taste positively.
 
 ### What other features in the dataset do you think will help support your \
 investigation into your feature(s) of interest?
 
+It's a geeky analysis as there can be way more other variables that can affect the tast of wine such as temperature and how long the wine was in contact with oxygen. However, for this analysis we really want to focus on physicochecmical properties. We think that looking at common properties that we analyze in a wine such as alcohol percentage, acidity levels (including pH), total sulfur dioxide (related to oxidation) and residual sugar (related to sweetness) may be the most impactful ones.
+
 ### Did you create any new variables from existing variables in the dataset?
+
+```{r echo=FALSE,message=FALSE, warning=FALSE}
+data$level.free.sulfur.dioxide <- cut(data$free.sulfur.dioxide, breaks=c(0, 50, 100), labels=c("Low Free SO2", "High Free SO2"))
+```
+
+Based on the description of the dataset, turns out that wines with levels of free SO2 higher than 50ppm (or mg/dm³) may have their taste affected. The SO2 mainly helps prevent oxidation, but can affect the taste if in high contration. Thus, we've created a categorical variable called `level.free.sulfur.dioxide` that splits the dataset into High(>50ppm) and Low (<=50ppm) levels of free SO2.
 
 ### Of the features you investigated, were there any unusual distributions? \
 Did you perform any operations on the data to tidy, adjust, or change the form \
 of the data? If so, why did you do this?
 
+Fixed and volatile acidity have shown 2 peaks each. Whereas Total SO2 has shown a long tail shape. We applied the log10 transform to total SO2 in order to reduce the skewness from the long tail and try to visualize it a more normal shape.
 
 # Bivariate Plots Section
 
