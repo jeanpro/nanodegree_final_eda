@@ -1,3 +1,8 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
 The Wine Geek Analysis 
 ========================================================
 ##### by Jean Phelippe Ramos de Oliveira (jean.phelippe92@gmail.com)
@@ -18,6 +23,8 @@ The Wine Geek Analysis
 library(lubridate)
 library(ggplot2)
 library(dplyr)
+#install.packages("psych")
+library(psych)
 ```
 
 ```{r echo=FALSE, Load_the_Data}
@@ -202,11 +209,114 @@ yourself to relationships between a main output feature and one of the
 supporting variables. Try to look at relationships between supporting variables
 as well.
 
-We can plot a few of the variables above in order to look for outliers. Variables such as `total.sulfur.dioxide` and `residual.sugar` presents a Maximum value that is way higher than their 3rd Quartile, which suggests some outliers.
+```{r echo=FALSE}
+cor(data %>% select(1:12), method = "pearson", use = "complete.obs")
+```
+
+```{r fig2, fig.height = 15, fig.width = 15, fig.align = "center"}
+
+pairs.panels(data, scale=TRUE)
+
+```
+
+
+After checking the correlation between all variables in the dataset we could see some high correlation between certain variabels:
+
+
+*  fixed.acidity vs. density
+
+*  fixed.acidity vs. citric.acid
+
+*  fixed.acidity vs. pH
+
+*  free.sulfur.dioxide vs. total.sulfur.dioxide
+
+*  alcohol vs. density
+
+*  quality vs. alcohol
+
+
 
 ```{r echo=FALSE, Bivariate_Plots}
 
+# We created a function for plotting with ggplot (adapted from: https://ggplot2.tidyverse.org/)
+ggplot_f <- function(dataset, x, y, opts=NULL) {
+  ggplot(dataset, aes_string(x = x, y = y)) +
+   geom_point(alpha = 1/5, position = position_jitter(h = 0), size = 2) +
+   geom_smooth(method = 'lm')
+}
+
+# density vs. fixed.acidity plot
+p <- ggplot_f(data, "density", "fixed.acidity")
+p + coord_cartesian(xlim=c(min(data$density),1.005))
+
+
 ```
+
+We can see the high positive correlation between fixed acidity and density. However a bit scattered in the central part.
+
+```{r echo=FALSE}
+
+# fixed.acidity vs. citric.acid plot
+p <- ggplot_f(data, "fixed.acidity", "citric.acid")
+p + coord_cartesian(xlim=c(min(data$fixed.acidity),max(data$fixed.acidity)))
+```
+
+We can see some correlation between citric acid and fixed acidity. Not as strong as others but still there.
+
+
+```{r echo=FALSE}
+
+# fixed.acidity vs. ph plot
+p <- ggplot_f(data, "fixed.acidity", "pH")
+p + coord_cartesian(xlim=c(min(data$fixed.acidity),max(data$fixed.acidity)))
+```
+
+A clear correlation between fixed acidity and pH. Higher fixed acidity yields lower pH, which is the definition of that index. 
+
+
+```{r echo=FALSE}
+
+# free.sulfur.dioxide vs. total.sulfur.dioxide plot
+p <- ggplot_f(data, "free.sulfur.dioxide", "total.sulfur.dioxide")
+p + coord_cartesian(xlim=c(min(data$free.sulfur.dioxide),max(data$free.sulfur.dioxide)))
+```
+
+Total and free sulfur dioxide also present some positive correlation as free sulfur dioxide levels depends on the molecular levels of sulfur dioxide.
+
+```{r echo=FALSE, message = FALSE, warning = FALSE}
+qplot(x = free.sulfur.dioxide, data = data, color = level.free.sulfur.dioxide)+
+  geom_vline(xintercept = quantile(data$free.sulfur.dioxide, 0.99))
+  
+```
+
+As we can see from above, the definition of High vs Low Free SO2 correlates with the 99th percentile of free sulfur dioxide. In other words, the cases with High Free SO2 are outliers and don't represent the dataset. Therefore, we have pretty much all wines under the 50ppm defined as ok amount of Free SO2 by the description of the dataset. From now on we won't use the variable created as it doesn't bring much value.
+
+
+```{r echo=FALSE}
+
+# alcohol vs. density plot
+p <- ggplot_f(data, "alcohol", "density")
+p + coord_cartesian(xlim=c(min(data$alcohol),max(data$alcohol)))
+```
+
+
+```{r echo=FALSE}
+
+# alcohol vs. quality
+ggplot(data, aes(x = factor(quality), y = alcohol)) +
+        geom_boxplot()
+```
+
+
+```{r echo=FALSE}
+
+# alcohol vs. quality
+ggplot(data, aes(x = factor(quality), y = volatile.acidity)) +
+        geom_boxplot()
+```
+
+
 
 # Bivariate Analysis
 
@@ -217,11 +327,26 @@ here. Use the questions below to guide your discussion.
 investigation. How did the feature(s) of interest vary with other features in \
 the dataset?
 
+* Higher alcohol levels are correlated to higher quality. 
+
+* Volatile acidity is correlated (negatively) with quality. From the plots above we can clearly see that higher quality wines have lower volatile acidity in a more controlled range.
+
 ### Did you observe any interesting relationships between the other features \
 (not the main feature(s) of interest)?
 
+* Fixed acidity and density seems to have a strong positive correlation.
+
+* Fixed acidity and Citric acid levels seem to have also very positive correlation. It's expected as fixed acidity is related to the acids in the wine.
+
+* Fixed acidity levels and pH have a strong correlation as well but negative, which is more than expected as higher acidity levels are linked to lower pH level by definition.
+
+* Total SO2 and Free SO2 also seems to have positive correlation and it's expected as more SO2 will eventually lead to more free SO2 on chemical mixtures. The degree will depend on the oxidation levels of the mixture, but it seems that for wines it's pretty much correlated.
+
+* Interestingly enough, density and alcohol also are highly correlated (negatively). Higher levels of alcohol yields lower density wines. It's very scattered so the correlation is not strong as previous ones. But still very correlated (-0.5).
+
 ### What was the strongest relationship you found?
 
+The strongest relationship found is between fixed acidity and pH, which is expected as pH is function of the acidity levels of a substance. Also we have strong correlation between total sulfur dioxide and free sulfur dioxide levels, which also makes sense as both depends on the levels of sulfur dioxide in the substance at a molecular levels.
 
 # Multivariate Plots Section
 
@@ -232,9 +357,51 @@ create here are justified by the plots you explored in the previous section. If
 you plan on creating any mathematical models, this is the section where you
 will do that.
 
-```{r echo=FALSE, Multivariate_Plots}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots, fig.height = 12, fig.width = 10, fig.align = "center"}
+
+# fixed acidity vs volatile acidity vs quality
+# looking at the top 95th percentile in order to skip outliers
+ggplot(aes(x = fixed.acidity, y = volatile.acidity, color = factor(quality)), data = data) +
+    geom_point(aes(size = factor(quality)), alpha = 1/2) +
+    scale_color_identity(guide = 'legend') +
+    ylim(min(data$volatile.acidity), quantile(data$volatile.acidity, 0.95)) +
+    xlim(min(data$fixed.acidity), quantile(data$fixed.acidity, 0.95)) 
 
 ```
+
+
+Higher quality wines tend to stay on the lower right part of the plot, which means higher fixed acidity and lower volatile acidity.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.height = 12, fig.width = 10, fig.align = "center"}
+# fixed acidity vs alcohol vs quality
+# looking at the top 95th percentile in order to skip outliers
+ggplot(aes(x = fixed.acidity, y = alcohol, color = factor(quality)), data = data) +
+    geom_point(aes(size = factor(quality)), alpha = 1/2) +
+    scale_color_identity(guide = 'legend') +
+    ylim(min(data$alcohol), quantile(data$alcohol, 0.95)) +
+    xlim(min(data$fixed.acidity), quantile(data$fixed.acidity, 0.95)) 
+
+```
+
+Higher levels of alcohol and fixed acity correlates with higher quality wines, we can see the wines >=7 in terms of quality stays on the top half of the plot.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.height = 12, fig.width = 10, fig.align = "center"}
+
+# total sulfur dioxide vs free sulfur dioxide vs quality
+# looking at the top 95th percentile in order to skip outliers
+ggplot(aes(x = total.sulfur.dioxide, y = free.sulfur.dioxide, color = factor(quality)), data = data) +
+    geom_point(aes(size = factor(quality)), alpha = 1/2) +
+    scale_color_identity(guide = 'legend') +
+    ylim(min(data$free.sulfur.dioxide), quantile(data$free.sulfur.dioxide, 0.95)) +
+    xlim(min(data$total.sulfur.dioxide), quantile(data$total.sulfur.dioxide, 0.95)) 
+```
+
+Good wines concentrate on the left side of the plot, we can see some correlation between higher quality wines and lower levels of total sulfur dioxide, in terms of free sulfur dioxide it's not that clear but they tend to stay in a region of lower concentration. 
+
+
+
+
 
 # Multivariate Analysis
 
@@ -242,7 +409,16 @@ will do that.
 investigation. Were there features that strengthened each other in terms of \
 looking at your feature(s) of interest?
 
+If we look at volatile acidity vs fixed acidity vs quality we can see there is a "sweet spot" area on the bottom right corner where lies the top quality wines (quality = 8) surronded by wines quality 5, 6 and 7. It's not 100% correlated but we can see a higher density of 7's and 8's down there compared to the opposite corner with higher volatile acidity and lower fixed acidity. 
+
+Also, if we look at the alcohol vs fixed acidity vs quality we can see that there is also another area with higher concentration of top quality wines (specially if we focus on 7's [yellow dots] and 8's [black dots]) on the top right corner with higher alcohol percentage and higher fixed acidity. Which aligns with our analysis from previous sections. It seems that alcohol levels and fixed acidity contributes for a higher quality wine perception. If we do the inverse excercise and look at the *bottom part of the chart* we can see almost no wines above 6 in terms of quality. 
+
+Finally, when looking at free sulfur dioxide vs total sulfur dioxide vs quality we can see majority of wines concentrate in a range of <25 for free sulfur dioxide but without much correlation with quality, which makes sense as the property is just related to conserving the wine. On the other hand, we can see higher quality wines staying at lower levels of total sulfur dioxide. It's known that too high levels of sulfur dioxide may alter the taste of wine.
+
 ### Were there any interesting or surprising interactions between features?
+
+It seems there's a cluster towards lower levels of free sulfur dioxide and total sulfur dioxide. It makes sense as sulfur dioxide is used mainly for conservation purposes. Therefore, it should have a standard concentration amongst wines with a delimited range. More than a certain concentration would only ruin the wine, lower would make it too perishable.
+
 
 ### OPTIONAL: Did you create any models with your dataset? Discuss the \
 strengths and limitations of your model.
@@ -260,28 +436,62 @@ units), and good aesthetic choices (e.g. color, transparency). After each plot,
 make sure you justify why you chose each plot by describing what it shows.
 
 ### Plot One
-```{r echo=FALSE, Plot_One}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align = "center", Plot_One}
+
+
+
+ggplot(data, aes_string(x = "density", y = "fixed.acidity")) +
+   geom_point(alpha = 1/5, position = position_jitter(h = 0), size = 2) +
+   geom_smooth(method = 'lm') + 
+   coord_cartesian(xlim=c(min(data$density),1.005)) +
+   xlab('Density (g/cm^3)') +
+   ylab('Fixed Acidity (g/dm^3)') +
+   ggtitle('Density vs. Fixed Acidity (Tartic Acid) correlation') + 
+   theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
 ### Description One
 
+From all the properties analyzed, Alcohol levels and density have the strongest correlation (approximately 0.67). The `Plot One` demonstrates the correlation and has a linear model that shows the trend and error based on `geom_smooth` function from the library `ggplot2` as a representation of the correlation. 
 
 ### Plot Two
-```{r echo=FALSE, Plot_Two}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.height = 10, fig.width = 10, fig.align = "center", Plot_Two}
+
+data$quality = as.factor(data$quality)
+
+ggplot(aes(x = fixed.acidity, y = volatile.acidity, color = quality), data = data) +
+    geom_point(aes(size = quality), alpha = 1/3) +
+    scale_color_identity(guide = 'legend') +
+    ylim(min(data$volatile.acidity), quantile(data$volatile.acidity, 0.95)) +
+    xlim(min(data$fixed.acidity), quantile(data$fixed.acidity, 0.95)) +
+    xlab('Fixed Acidity (g/dm^3)') +
+    ylab('Volatile Acidity (g/dm^3)') +
+    ggtitle('Wine Quality correlation with Fixed (Tartic Acid) and Volatile (Acetic Acid) acidity levels') +
+   theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
 ### Description Two
 
+`Plot Two` shows us the correlation between higher quality wines, lower levels of volatile acidity and higher levels of fixed acidity. In other words, the higher quality wines concentrate at the bottom right corner of the plot. 
+
 
 ### Plot Three
-```{r echo=FALSE, Plot_Three}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align = "center", Plot_Three}
+
+ggplot(data = data, aes(y = alcohol, x = factor(quality))) +
+   geom_boxplot() +
+   xlab('Quality') +
+   ylab('Alcohol (% by vol)') +
+   ggtitle('How Alcohol Level Affects Wine Quality') +
+   theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
 ### Description Three
 
+The variable with strongest correlation to quality was alcohol levels. From the `Plot Three` we can see that higher quality wines (quality levels around 7 and 8) have higher alcohol % over volume. It seems that this variable has a strong relavance on defining the wine quality.
 ------
 
 # Reflection
@@ -290,6 +500,18 @@ make sure you justify why you chose each plot by describing what it shows.
 the insights you found. What were some of the struggles that you went through?
 What went well? What was surprising? Make sure you include an insight into
 future work that could be done with the dataset.
+
+We have performed an Exploratory Data Analysis over the dataset related to red variant of the Portuguese "Vinho Verde" wine. We tried to first understand the dataset and it's variables, look for validations, for instance the low pH levels as expected from wines due to acidity. Similarly, we looked into trends and how the quality of the wines was distributed. Aftewards, we started to look for correlations and trends between different variables. Finally, we looked at those same trends and their correlation with quality, the main variable of interest in this dataset. Below we can find few highlights over this process.
+
+* It seems there's only a variable with stronger corrlation with quality which is `alcohol` levels. We were able to see that higher quality wines (quality levels around 7 and 8) have higher alcohol percentages. Maybe stronger wines use more grapes or higher quality grapes that have more sugar yileding better wines. Or maybe the taste of the wine as an alcohol drink is also linked to the taste of alcohol. Abscence of alcohol may also affect the smells as it is a very volatile substance.
+
+* `Volatile acidity` and `Fixed acidity` also have some correlation with the quality. We could interpret it as more "stable" wines with higher levels of fixed acidity and lower levels of volatile acidity tend to have better quality. The volatile acidity is linked to acetic acid that can potentially bring some bad taste (like vinegar). Hence, higher levels of volatile acidity would definetely impact the taste and quality negatively. On the other hand, fixed acidity is linked to the pH which measuares how basic or acid a substance is and by definition can affect the taste as our mouth reacts differently for different levels of pH. We don't have enough data to show that the variation on the dataset would actually be percieved by a human paladar.
+
+* Overall we had a lot of variables to look at, we ended up focusing on a few that sounded as they would impact taste. Of course, we could expand this analysis endelessly, but given the time and knowledge constraint we chose a few variables and we didnt perform any relevant transformations. Segragating the dataset between higher and lower levels of sulfur dioxide showed no results whatsoever. 
+
+
+For a next step, we would like to look into prices, costs and brands and how they would affect the quality evaluations. Also, trying to understand better the evalutaion process given the weather and temperature as it definely affects the sensorial experiences.
+
 
 > Citation: P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. 
   Modeling wine preferences by data mining from physicochemical properties.
