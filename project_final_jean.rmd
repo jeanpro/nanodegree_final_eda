@@ -203,11 +203,7 @@ Fixed and volatile acidity have shown 2 peaks each. Whereas Total SO2 has shown 
 
 # Bivariate Plots Section
 
-> **Tip**: Based on what you saw in the univariate plots, what relationships
-between variables might be interesting to look at in this section? Don't limit
-yourself to relationships between a main output feature and one of the
-supporting variables. Try to look at relationships between supporting variables
-as well.
+
 
 ```{r echo=FALSE}
 cor(data %>% select(1:12), method = "pearson", use = "complete.obs")
@@ -320,8 +316,6 @@ ggplot(data, aes(x = factor(quality), y = volatile.acidity)) +
 
 # Bivariate Analysis
 
-> **Tip**: As before, summarize what you found in your bivariate explorations
-here. Use the questions below to guide your discussion.
 
 ### Talk about some of the relationships you observed in this part of the \
 investigation. How did the feature(s) of interest vary with other features in \
@@ -350,12 +344,7 @@ The strongest relationship found is between fixed acidity and pH, which is expec
 
 # Multivariate Plots Section
 
-> **Tip**: Now it's time to put everything together. Based on what you found in
-the bivariate plots section, create a few multivariate plots to investigate
-more complex interactions between variables. Make sure that the plots that you
-create here are justified by the plots you explored in the previous section. If
-you plan on creating any mathematical models, this is the section where you
-will do that.
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots, fig.height = 12, fig.width = 10, fig.align = "center"}
 
@@ -400,9 +389,6 @@ ggplot(aes(x = total.sulfur.dioxide, y = free.sulfur.dioxide, color = factor(qua
 Good wines concentrate on the left side of the plot, we can see some correlation between higher quality wines and lower levels of total sulfur dioxide, in terms of free sulfur dioxide it's not that clear but they tend to stay in a region of lower concentration. 
 
 
-
-
-
 # Multivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the \
@@ -420,20 +406,10 @@ Finally, when looking at free sulfur dioxide vs total sulfur dioxide vs quality 
 It seems there's a cluster towards lower levels of free sulfur dioxide and total sulfur dioxide. It makes sense as sulfur dioxide is used mainly for conservation purposes. Therefore, it should have a standard concentration amongst wines with a delimited range. More than a certain concentration would only ruin the wine, lower would make it too perishable.
 
 
-### OPTIONAL: Did you create any models with your dataset? Discuss the \
-strengths and limitations of your model.
-
 ------
 
 # Final Plots and Summary
 
-> **Tip**: You've done a lot of exploration and have built up an understanding
-of the structure of and relationships between the variables in your dataset.
-Here, you will select three plots from all of your previous exploration to
-present here as a summary of some of your most interesting findings. Make sure
-that you have refined your selected plots for good titling, axis labels (with
-units), and good aesthetic choices (e.g. color, transparency). After each plot,
-make sure you justify why you chose each plot by describing what it shows.
 
 ### Plot One
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align = "center", Plot_One}
@@ -492,14 +468,11 @@ ggplot(data = data, aes(y = alcohol, x = factor(quality))) +
 ### Description Three
 
 The variable with strongest correlation to quality was alcohol levels. From the `Plot Three` we can see that higher quality wines (quality levels around 7 and 8) have higher alcohol % over volume. It seems that this variable has a strong relavance on defining the wine quality.
+
+
 ------
 
 # Reflection
-
-> **Tip**: Here's the final step! Reflect on the exploration you performed and
-the insights you found. What were some of the struggles that you went through?
-What went well? What was surprising? Make sure you include an insight into
-future work that could be done with the dataset.
 
 We have performed an Exploratory Data Analysis over the dataset related to red variant of the Portuguese "Vinho Verde" wine. We tried to first understand the dataset and it's variables, look for validations, for instance the low pH levels as expected from wines due to acidity. Similarly, we looked into trends and how the quality of the wines was distributed. Aftewards, we started to look for correlations and trends between different variables. Finally, we looked at those same trends and their correlation with quality, the main variable of interest in this dataset. Below we can find few highlights over this process.
 
@@ -517,3 +490,20 @@ For a next step, we would like to look into prices, costs and brands and how the
   Modeling wine preferences by data mining from physicochemical properties.
   In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
 
+### Other Sources:
+
+https://s3.amazonaws.com/content.udacity-data.com/courses/ud651/diamondsExample_2016-05.html
+
+https://cran.r-project.org/web/packages/psych/psych.pdf
+
+https://jamesmarquezportfolio.com/correlation_matrices_in_r.html
+
+https://www.datanovia.com/en/blog/ggplot-legend-title-position-and-labels/#rename-legend-labels-and-change-the-order-of-items
+
+https://s3.amazonaws.com/udacity-hosted-downloads/ud651/wineQualityInfo.txt
+
+http://www3.dsi.uminho.pt/pcortez/wine5.pdf
+
+https://www.scitepress.org/Papers/2015/55519/55519.pdf
+
+https://stackoverflow.com/questions/40675778/center-plot-title-in-ggplot2
